@@ -363,9 +363,21 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <p className="text-[var(--text-secondary)] text-sm">
+          <p className="text-[var(--text-secondary)] text-sm mb-8">
             Built for creators who want real feedback, not compliments.
           </p>
+
+          {/* Pro Upsell */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--accent)]/10 to-[var(--accent-light)]/10 border border-[var(--accent)]/20 text-left">
+            <h3 className="text-lg font-bold mb-2">🚀 Want deeper, AI-powered analysis?</h3>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">
+              Upgrade to Pro for Claude-powered feedback, rewrite suggestions, analysis history, and more.
+            </p>
+            <a href="/pricing"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] hover:opacity-90 transition-all text-sm shadow-lg shadow-[var(--accent)]/20">
+              See Pro Plans — $9/mo →
+            </a>
+          </div>
         </div>
       )}
 
