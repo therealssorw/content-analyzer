@@ -170,8 +170,8 @@ async function analyzeWithOpenRouter(content: string, contentType: string, apiKe
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
-      "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://contentlens.app",
-      "X-Title": "ContentLens",
+      "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://contentlens.ai",
+      "X-Title": "ContentLens.ai",
     },
     body: JSON.stringify({
       model,

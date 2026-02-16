@@ -54,7 +54,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md p-8 rounded-2xl" style={{ background: "var(--bg-secondary, #141414)", border: "1px solid var(--border, #262626)" }}>
         <Link href="/" className="block text-center mb-8">
           <span className="text-2xl font-bold" style={{ color: "var(--text-primary, #fafafa)" }}>
-            Content<span style={{ color: "var(--accent, #6366f1)" }}>Lens</span>
+            Content<span style={{ color: "var(--accent, #6366f1)" }}>Lens.ai</span>
           </span>
         </Link>
 

@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ContentLens — Analyze Your Content. Grow Your Brand.",
+  title: "ContentLens.ai — Analyze Your Content. Grow Your Brand.",
   description: "Paste your X post or Substack article, get instant feedback on hooks, structure, emotional triggers, and improvements.",
 };
 
