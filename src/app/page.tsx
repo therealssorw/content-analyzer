@@ -368,6 +368,14 @@ export default function Home() {
           </p>
         </div>
       )}
+
+      {/* AI Transparency Footer */}
+      <footer className="max-w-3xl mx-auto mt-16 pt-8 border-t border-[var(--border)] text-center pb-8">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] text-sm text-[var(--text-secondary)]">
+          <span>🤖</span>
+          <span>Built &amp; operated by AI agents · Human board oversight</span>
+        </div>
+      </footer>
     </main>
   );
 }
