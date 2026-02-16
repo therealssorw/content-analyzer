@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { analyzeContent } from "@/lib/ai-providers";
 import { sanitizeContent, detectContentType } from "@/lib/content-utils";
+import { analyzeReadability } from "@/lib/readability";
 
 // Simple in-memory rate limiter (resets on redeploy — fine for MVP)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -55,9 +56,11 @@ export async function POST(req: NextRequest) {
     const type = rawType === "auto" ? detectContentType(content) : rawType;
 
     const { result, provider } = await analyzeContent(content, type);
+    const readability = analyzeReadability(content);
 
     return NextResponse.json({
       ...result,
+      readability,
       mock: provider === "mock",
       provider,
       detectedType: type,

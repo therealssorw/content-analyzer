@@ -15,6 +15,18 @@ interface AnalysisResult {
   improvements: string[];
   summary: string;
   mock?: boolean;
+  readability?: {
+    fleschReadingEase: number;
+    gradeLevel: string;
+    avgSentenceLength: number;
+    wordCount: number;
+    sentenceCount: number;
+    paragraphCount: number;
+    longSentences: number;
+    passiveVoiceEstimate: number;
+    readingTimeSeconds: number;
+    suggestions: string[];
+  };
 }
 
 interface HistoryEntry {
@@ -362,6 +374,54 @@ export default function Home() {
               ))}
             </ul>
           </div>
+
+          {result.readability && (
+            <div className="fade-up fade-up-delay-4 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">📖</span>
+                <h3 className="text-lg font-bold">Readability</h3>
+                <span className={`ml-auto text-2xl font-bold ${
+                  result.readability.fleschReadingEase >= 60 ? "text-emerald-400" :
+                  result.readability.fleschReadingEase >= 40 ? "text-yellow-400" : "text-red-400"
+                }`}>
+                  {result.readability.fleschReadingEase}
+                </span>
+              </div>
+              <p className="text-[var(--text-secondary)] text-sm mb-3">{result.readability.gradeLevel}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div className="text-center p-2 rounded-lg bg-[var(--bg-tertiary)]">
+                  <div className="text-lg font-bold text-white">{result.readability.wordCount}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">Words</div>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-[var(--bg-tertiary)]">
+                  <div className="text-lg font-bold text-white">{result.readability.sentenceCount}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">Sentences</div>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-[var(--bg-tertiary)]">
+                  <div className="text-lg font-bold text-white">{Math.round(result.readability.avgSentenceLength)}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">Avg Words/Sent</div>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-[var(--bg-tertiary)]">
+                  <div className="text-lg font-bold text-white">
+                    {result.readability.readingTimeSeconds < 60
+                      ? `${result.readability.readingTimeSeconds}s`
+                      : `${Math.round(result.readability.readingTimeSeconds / 60)}m`}
+                  </div>
+                  <div className="text-xs text-[var(--text-secondary)]">Read Time</div>
+                </div>
+              </div>
+              {result.readability.suggestions.length > 0 && (
+                <ul className="space-y-2">
+                  {result.readability.suggestions.map((s, i) => (
+                    <li key={i} className="flex gap-2 text-sm text-[var(--text-secondary)]">
+                      <span className="text-yellow-400">⚡</span>
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           <RewriteHook content={content} type={type} analysis={result} />
 
