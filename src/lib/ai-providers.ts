@@ -6,6 +6,8 @@
  * Priority: ANTHROPIC_API_KEY > OPENAI_API_KEY > GOOGLE_AI_API_KEY > mock
  */
 
+import { runSmartAnalysis } from "./content-analysis";
+
 export interface AnalysisResult {
   overallScore: number;
   hookStrength: { score: number; feedback: string };
@@ -55,7 +57,7 @@ function parseAIResponse(raw: string): AnalysisResult {
   return JSON.parse(cleaned) as AnalysisResult;
 }
 
-type Provider = "anthropic" | "openai" | "google" | "mock";
+type Provider = "anthropic" | "openai" | "google" | "openrouter" | "mock";
 
 function detectProvider(): { provider: Provider; apiKey: string } {
   const anthropic = process.env.ANTHROPIC_API_KEY;
@@ -66,6 +68,9 @@ function detectProvider(): { provider: Provider; apiKey: string } {
 
   const google = process.env.GOOGLE_AI_API_KEY;
   if (google) return { provider: "google", apiKey: google };
+
+  const openrouter = process.env.OPENROUTER_API_KEY;
+  if (openrouter) return { provider: "openrouter", apiKey: openrouter };
 
   return { provider: "mock", apiKey: "" };
 }
@@ -154,6 +159,41 @@ async function analyzeWithGoogle(content: string, contentType: string, apiKey: s
   return parseAIResponse(raw);
 }
 
+async function analyzeWithOpenRouter(content: string, contentType: string, apiKey: string): Promise<AnalysisResult> {
+  // OpenRouter supports many models including free ones
+  // Free tier: google/gemma-3-1b-it:free, meta-llama/llama-3.2-3b-instruct:free
+  // Paid tier: uses whatever model is configured
+  const model = process.env.OPENROUTER_MODEL || "google/gemma-3-12b-it:free";
+  
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+      "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://contentlens.app",
+      "X-Title": "ContentLens",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `Content type: ${contentType}\n\n${content}` },
+      ],
+      temperature: 0.7,
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    console.error("OpenRouter API error:", response.status, err);
+    throw new Error(`OpenRouter API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return parseAIResponse(data.choices[0].message.content);
+}
+
 export async function analyzeContent(content: string, type: string): Promise<{ result: AnalysisResult; provider: Provider }> {
   const { provider, apiKey } = detectProvider();
   const contentType = type === "tweet" ? "X/Twitter post" : "Substack article";
@@ -174,6 +214,9 @@ export async function analyzeContent(content: string, type: string): Promise<{ r
       case "google":
         result = await analyzeWithGoogle(content, contentType, apiKey);
         break;
+      case "openrouter":
+        result = await analyzeWithOpenRouter(content, contentType, apiKey);
+        break;
     }
     return { result, provider };
   } catch (err) {
@@ -183,64 +226,6 @@ export async function analyzeContent(content: string, type: string): Promise<{ r
 }
 
 export function getMockAnalysis(content: string, type: string): AnalysisResult {
-  const len = content.length;
-  const hasQuestion = content.includes("?");
-  const hasNumbers = /\d/.test(content);
-  const hasEmoji = /[\u{1F600}-\u{1F9FF}]/u.test(content);
-  const baseScore = Math.min(95, Math.max(35, 50 + (len > 100 ? 10 : 0) + (hasQuestion ? 8 : 0) + (hasNumbers ? 7 : 0) + (hasEmoji ? 5 : 0)));
-
-  if (type === "tweet") {
-    return {
-      overallScore: baseScore,
-      hookStrength: {
-        score: Math.min(100, baseScore + 5),
-        feedback: hasQuestion
-          ? "Strong opening — leading with a question creates instant curiosity. The reader's brain can't help but try to answer it."
-          : "Your hook is decent but could hit harder. Try opening with a bold claim, a surprising stat, or a direct question to stop the scroll.",
-      },
-      structure: {
-        score: Math.min(100, baseScore - 3),
-        feedback: len > 200
-          ? "Good use of length for a thread-style post. Consider adding line breaks every 1-2 sentences for better scannability on mobile."
-          : "Concise and punchy — perfect for the timeline. Each word earns its place.",
-      },
-      emotionalTriggers: {
-        score: Math.min(100, baseScore + 2),
-        feedback: "You're tapping into curiosity and authority. To boost engagement, add a contrarian angle or personal vulnerability — those drive replies.",
-        triggers: ["Curiosity", "Authority", hasQuestion ? "Open Loop" : "Statement of Belief"],
-      },
-      improvements: [
-        "Add a specific number or data point to increase credibility",
-        "End with a clear CTA — ask a question or invite disagreement",
-        "Consider breaking into a thread if you have supporting points",
-        len < 100 ? "You have room to add more context without losing punch" : "Trim any filler words to tighten the message",
-      ],
-      summary: "This post has solid bones. The voice is clear and the point lands. With a stronger hook and a conversation-starting CTA, this could easily 2-3x its engagement.",
-    };
-  }
-
-  return {
-    overallScore: baseScore,
-    hookStrength: {
-      score: Math.min(100, baseScore + 3),
-      feedback: "Your headline needs to promise a transformation or reveal. Top Substack writers use specificity — instead of 'How to Write Better', try 'The 3-Sentence Framework That Doubled My Open Rate'.",
-    },
-    structure: {
-      score: Math.min(100, baseScore - 5),
-      feedback: "The piece flows reasonably well but could benefit from more subheadings and shorter paragraphs. Readers scan before they commit — give them clear signposts.",
-    },
-    emotionalTriggers: {
-      score: Math.min(100, baseScore + 1),
-      feedback: "You're building trust through expertise, but the emotional core is buried. Lead with the feeling, then back it with logic.",
-      triggers: ["Trust", "Expertise", "Aspiration", hasQuestion ? "Curiosity" : "Belonging"],
-    },
-    improvements: [
-      "Open with a story or vivid scene — not a thesis statement",
-      "Add 2-3 subheadings that work as standalone hooks",
-      "Include a 'what this means for you' section to make it personal",
-      "Your closing should loop back to the opening — create narrative closure",
-      "Add a P.S. with a question to drive comments",
-    ],
-    summary: "This article has genuine insight but buries the lead. Restructuring the first 3 paragraphs to hook emotionally before going analytical could significantly boost read-through rate and shares.",
-  };
+  return runSmartAnalysis(content, type);
 }
+

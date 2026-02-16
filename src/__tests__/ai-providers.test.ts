@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { getMockAnalysis } from "@/lib/ai-providers";
 
 describe("getMockAnalysis", () => {
   it("returns valid structure for tweet type", () => {
-    const result = getMockAnalysis("This is a test tweet", "tweet");
+    const result = getMockAnalysis("Why do most people fail at writing? Here's what I learned.", "tweet");
     expect(result).toHaveProperty("overallScore");
     expect(result).toHaveProperty("hookStrength");
     expect(result).toHaveProperty("structure");
@@ -13,11 +13,10 @@ describe("getMockAnalysis", () => {
     expect(result.overallScore).toBeGreaterThanOrEqual(1);
     expect(result.overallScore).toBeLessThanOrEqual(100);
     expect(result.improvements.length).toBeGreaterThanOrEqual(1);
-    expect(result.emotionalTriggers.triggers.length).toBeGreaterThanOrEqual(1);
   });
 
   it("returns valid structure for article type", () => {
-    const result = getMockAnalysis("This is a longer article about writing...", "article");
+    const result = getMockAnalysis("This is a longer article about writing and why it matters for your career.", "article");
     expect(result.overallScore).toBeGreaterThanOrEqual(1);
     expect(result.hookStrength.score).toBeGreaterThanOrEqual(1);
     expect(result.structure.score).toBeGreaterThanOrEqual(1);
@@ -25,31 +24,29 @@ describe("getMockAnalysis", () => {
   });
 
   it("scores higher for content with questions", () => {
-    const withQ = getMockAnalysis("Why do people fail at writing? Here's the secret.", "tweet");
-    const withoutQ = getMockAnalysis("People fail at writing. Here is the secret.", "tweet");
+    const withQ = getMockAnalysis("Why do people fail at writing? Here's the secret nobody shares.", "tweet");
+    const withoutQ = getMockAnalysis("People fail at writing. Here is a fact.", "tweet");
     expect(withQ.overallScore).toBeGreaterThan(withoutQ.overallScore);
   });
 
-  it("scores higher for content with numbers", () => {
-    const withNum = getMockAnalysis("5 ways to improve your writing today", "tweet");
-    const withoutNum = getMockAnalysis("Ways to improve your writing today", "tweet");
-    expect(withNum.overallScore).toBeGreaterThan(withoutNum.overallScore);
+  it("scores higher for content with hook techniques", () => {
+    const strong = getMockAnalysis("7 shocking mistakes that kill your writing career — and what to do instead", "tweet");
+    const weak = getMockAnalysis("Writing is important for everyone", "tweet");
+    expect(strong.overallScore).toBeGreaterThan(weak.overallScore);
   });
 
-  it("scores higher for longer content", () => {
-    const long = getMockAnalysis("A".repeat(150), "tweet");
-    const short = getMockAnalysis("Short", "tweet");
-    expect(long.overallScore).toBeGreaterThan(short.overallScore);
+  it("detects emotional triggers", () => {
+    const result = getMockAnalysis("I admit I was terrified of failure. But this secret discovery changed everything. You won't believe the proven data.", "tweet");
+    expect(result.emotionalTriggers.triggers.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("caps score at 95", () => {
-    // Content with everything: long, question, numbers, emoji
-    const result = getMockAnalysis("A".repeat(200) + "? 123 😀", "tweet");
-    expect(result.overallScore).toBeLessThanOrEqual(95);
+  it("caps score at 98", () => {
+    const result = getMockAnalysis("Why do 97% of writers secretly fail? I discovered the shocking truth after years of painful struggle. You need to hear this now.", "tweet");
+    expect(result.overallScore).toBeLessThanOrEqual(98);
   });
 
-  it("floors score at 35", () => {
-    const result = getMockAnalysis("", "tweet");
-    expect(result.overallScore).toBeGreaterThanOrEqual(35);
+  it("floors score at 15", () => {
+    const result = getMockAnalysis("ok", "tweet");
+    expect(result.overallScore).toBeGreaterThanOrEqual(15);
   });
 });

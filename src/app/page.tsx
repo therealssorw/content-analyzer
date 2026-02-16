@@ -27,6 +27,13 @@ interface AnalysisResult {
     readingTimeSeconds: number;
     suggestions: string[];
   };
+  tone?: {
+    formality: { level: string; score: number };
+    confidence: { level: string; score: number };
+    voice: string;
+    personality: string[];
+    suggestions: string[];
+  };
 }
 
 interface HistoryEntry {
@@ -415,6 +422,53 @@ export default function Home() {
                   {result.readability.suggestions.map((s, i) => (
                     <li key={i} className="flex gap-2 text-sm text-[var(--text-secondary)]">
                       <span className="text-yellow-400">⚡</span>
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {result.tone && (
+            <div className="fade-up fade-up-delay-4 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">🎭</span>
+                <h3 className="text-lg font-bold">Tone & Voice</h3>
+                <span className="ml-auto text-sm font-medium text-[var(--accent)] bg-[var(--accent)]/10 px-3 py-1 rounded-full">
+                  {result.tone.voice}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="p-3 rounded-lg bg-[var(--bg-tertiary)]">
+                  <div className="text-xs text-[var(--text-secondary)] mb-1">Formality</div>
+                  <div className="text-sm font-bold text-white capitalize">{result.tone.formality.level}</div>
+                  <div className="mt-1.5 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                    <div className="h-full rounded-full bg-blue-400" style={{ width: `${result.tone.formality.score}%` }} />
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-[var(--bg-tertiary)]">
+                  <div className="text-xs text-[var(--text-secondary)] mb-1">Confidence</div>
+                  <div className="text-sm font-bold text-white capitalize">{result.tone.confidence.level}</div>
+                  <div className="mt-1.5 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                    <div className="h-full rounded-full bg-emerald-400" style={{ width: `${result.tone.confidence.score}%` }} />
+                  </div>
+                </div>
+              </div>
+              {result.tone.personality.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {result.tone.personality.map((trait) => (
+                    <span key={trait} className="text-xs px-2.5 py-1 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {result.tone.suggestions.length > 0 && (
+                <ul className="space-y-2">
+                  {result.tone.suggestions.map((s, i) => (
+                    <li key={i} className="flex gap-2 text-sm text-[var(--text-secondary)]">
+                      <span className="text-purple-400">💡</span>
                       <span>{s}</span>
                     </li>
                   ))}
