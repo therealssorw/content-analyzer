@@ -118,6 +118,9 @@ export default function Home() {
       <div className="max-w-3xl mx-auto flex justify-end mb-4 gap-3">
         {user ? (
           <>
+            <a href="/history" className="px-4 py-2 rounded-lg text-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-white transition-colors">
+              📊 History
+            </a>
             <span className="text-sm text-[var(--text-secondary)] self-center">{user.email}</span>
             <button onClick={handleLogout} className="px-4 py-2 rounded-lg text-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-white transition-colors cursor-pointer">
               Log out
@@ -139,9 +142,14 @@ export default function Home() {
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
           Content<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)]">Lens</span><span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)]">.ai</span>
         </h1>
-        <p className="text-lg text-[var(--text-secondary)] max-w-xl mx-auto">
-          Paste your X post or Substack article. Get instant feedback on what makes people stop, read, and engage.
+        <p className="text-lg text-[var(--text-secondary)] max-w-xl mx-auto mb-4">
+          Paste your X post or Substack article. Get instant AI feedback on what makes people stop, read, and engage.
         </p>
+        <div className="flex items-center justify-center gap-6 text-sm text-[var(--text-secondary)]">
+          <span className="flex items-center gap-1.5">✅ Free to start</span>
+          <span className="flex items-center gap-1.5">⚡ Results in seconds</span>
+          <span className="flex items-center gap-1.5">🎯 Actionable feedback</span>
+        </div>
       </div>
 
       {/* Input */}
