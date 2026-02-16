@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 interface AnalysisResult {
   overallScore: number;
@@ -69,6 +71,22 @@ export default function Home() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   const analyze = async () => {
     if (!content.trim()) return;
@@ -96,6 +114,22 @@ export default function Home() {
 
   return (
     <main className="min-h-screen px-4 py-12 md:py-20">
+      {/* Auth Bar */}
+      <div className="max-w-3xl mx-auto flex justify-end mb-4 gap-3">
+        {user ? (
+          <>
+            <span className="text-sm text-[var(--text-secondary)] self-center">{user.email}</span>
+            <button onClick={handleLogout} className="px-4 py-2 rounded-lg text-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-white transition-colors cursor-pointer">
+              Log out
+            </button>
+          </>
+        ) : (
+          <a href="/login" className="px-4 py-2 rounded-lg text-sm bg-[var(--accent)] text-white font-medium hover:opacity-90 transition-all">
+            Log in
+          </a>
+        )}
+      </div>
+
       {/* Header */}
       <div className="max-w-3xl mx-auto text-center mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent-light)] text-sm mb-6">
