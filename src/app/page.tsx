@@ -140,7 +140,7 @@ export default function Home() {
           AI-Powered Content Analysis
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
-          Content<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)]">Lens</span><span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)]">.ai</span>
+          Post<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)]">Pulse</span>
         </h1>
         <p className="text-lg text-[var(--text-secondary)] max-w-xl mx-auto mb-4">
           Paste your X post or Substack article. Get instant AI feedback on what makes people stop, read, and engage.
@@ -378,7 +378,7 @@ export default function Home() {
               ← Analyze Another
             </button>
             <button onClick={() => {
-              const text = `ContentLens.ai Score: ${result.overallScore}/100\n\n🎣 Hook: ${result.hookStrength.score}/100\n🏗️ Structure: ${result.structure.score}/100\n💡 Emotion: ${result.emotionalTriggers.score}/100\n\nKey improvements:\n${result.improvements.map(i => `→ ${i}`).join("\n")}\n\n${result.summary}`;
+              const text = `PostPulse Score: ${result.overallScore}/100\n\n🎣 Hook: ${result.hookStrength.score}/100\n🏗️ Structure: ${result.structure.score}/100\n💡 Emotion: ${result.emotionalTriggers.score}/100\n\nKey improvements:\n${result.improvements.map(i => `→ ${i}`).join("\n")}\n\n${result.summary}`;
               navigator.clipboard.writeText(text).then(() => setCopied(true));
               setTimeout(() => setCopied(false), 2000);
             }}
